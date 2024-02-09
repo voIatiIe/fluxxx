@@ -1,0 +1,13 @@
+version: '3'
+
+tasks:
+  build-docker:
+    cmds:
+      - docker build -t fluxxx-image .
+  start-docker:
+    cmds:
+      - docker run -it -v .:/app fluxxx-image
+  build:
+    cmds:
+      - cmake -S . -B build
+      - make -C build
