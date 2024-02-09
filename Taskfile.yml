@@ -6,8 +6,28 @@ tasks:
       - docker build -t fluxxx-image .
   start-docker:
     cmds:
-      - docker run -it -v .:/app fluxxx-image
+      - docker run -it -v .:/app --rm fluxxx-image
+
+  unzip-libtorch:
+    cmds:
+      - sh -c "[ ! -d "/app/libtorch" ] && unzip /libtorch.zip -d /app"
+
+  _clean:
+    cmds:
+      - rm -rf build
+      - mkdir build
+      - echo "Clean done"
+
   build:
     cmds:
       - cmake -S . -B build
       - make -C build
+      - echo "Build done"
+
+  rebuild:
+    deps:
+      - _clean
+      - build
+    cmds:
+      - echo "Rebuild done"
+

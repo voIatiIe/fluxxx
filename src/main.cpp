@@ -1,8 +1,10 @@
 #include "class.hpp"
 #include <iostream>
+#include <torch/torch.h>
 
 int main() {
     Class myObject;
-    std::cout << "Hello, World!" << std::endl;
+    torch::Tensor tensor = torch::rand({2, 3});
+    std::cout << tensor << std::endl;
     return 0;
 }

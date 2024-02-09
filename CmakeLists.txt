@@ -4,9 +4,13 @@ project(fluxxx)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_PREFIX_PATH "/opt/libtorch")
+
+find_package(Torch REQUIRED)
 
 file(GLOB SOURCES "src/*.cpp")
 
 include_directories(include)
 
 add_executable(fluxxx ${SOURCES})
+target_link_libraries(fluxxx "${TORCH_LIBRARIES}")
