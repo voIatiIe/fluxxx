@@ -9,6 +9,7 @@
 class Sampler : public torch::nn::Module {
 public:
     explicit Sampler(int dim, std::shared_ptr<Distribution> prior);
+    virtual ~Sampler() = default;
 
     virtual at::Tensor log_prob(at::Tensor x) const final;
     virtual at::Tensor forward(int n_points) const final;

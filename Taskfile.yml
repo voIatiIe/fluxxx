@@ -12,6 +12,3 @@ tasks:
     cmds:
       - cmake -S . -B build
       - make -C build
-      - echo "Build done"
-
-

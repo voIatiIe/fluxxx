@@ -6,6 +6,7 @@
 class Integrand {
 public:
     explicit Integrand(int dim);
+    virtual ~Integrand() = default;
 
     at::Tensor operator()(at::Tensor x);
     void reset();
