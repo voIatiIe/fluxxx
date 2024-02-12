@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "sampler.hpp"
 
 
@@ -11,6 +13,3 @@ at::Tensor Sampler::forward(int n_points) const {
 
     return at::cat({ sample, log_j.unsqueeze(-1) }, -1);
 }
-
-
-UniformSampler::UniformSampler(int dim) : Sampler(dim, std::make_shared<UniformDistribution>(dim)) {}

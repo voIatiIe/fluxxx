@@ -2,20 +2,22 @@
 
 #include <vector>
 #include <optional>
-#include <cstddef> 
+#include <cstddef>
+
+#include <torch/torch.h>
 
 
 class Mask {
 public:
-    explicit Mask(int dim);
+    Mask(int dim);
     virtual ~Mask() = default;
 
-    virtual std::vector<std::vector<bool>> operator()(std::optional<std::size_t> n = std::nullopt) const final;
+    virtual std::vector<at::Tensor> operator()(std::optional<std::size_t> n = std::nullopt) const final;
 
 protected:
     int dim;
 
-    virtual std::vector<std::vector<bool>> masks() const = 0;
+    virtual std::vector<at::Tensor> masks() const = 0;
 };
 
 
@@ -24,5 +26,5 @@ public:
     using Mask::Mask;
 
 protected:
-    std::vector<std::vector<bool>> masks() const override;
+    std::vector<at::Tensor> masks() const override;
 };

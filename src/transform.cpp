@@ -5,23 +5,21 @@
 
 CouplingTransform::CouplingTransform() : inverted(false) {}
 
-std::pair<at::Tensor, std::optional<at::Tensor>> CouplingTransform::operator()(
+std::pair<at::Tensor, at::Tensor> CouplingTransform::operator()(
     at::Tensor x,
-    at::Tensor theta,
-    bool compute_log_jacobian
+    at::Tensor theta
 ) const {
     if (is_inverted())
-        return backward(x, theta, compute_log_jacobian);
+        return backward(x, theta);
     else
-        return forward(x, theta, compute_log_jacobian);
+        return forward(x, theta);
 }
 
 // TODO: Rewiew this
 
-std::pair<at::Tensor, std::optional<at::Tensor>> PWLinearCouplingTransform::forward(
+std::pair<at::Tensor, at::Tensor> PWLinearCouplingTransform::forward(
     at::Tensor x,
-    at::Tensor theta,
-    bool compute_log_jacobian
+    at::Tensor theta
 ) const {
     auto N_ = theta.size(0);
     auto x_dim_ = theta.size(1);
@@ -41,20 +39,17 @@ std::pair<at::Tensor, std::optional<at::Tensor>> PWLinearCouplingTransform::forw
     if (at::any(bin_id < 0).item<bool>() || at::any(bin_id >= n_bins).item<bool>())
         throw std::runtime_error("Indexing error!");
 
-    x = x - bin_id.toType(torch::kDouble) / n_bins;
+    x = x - bin_id.toType(at::kDouble) / n_bins;
     auto slope = at::gather(theta, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
 
     x *= slope;
 
-    at::optional<at::Tensor> log_jacobian = at::nullopt;
-    if (compute_log_jacobian) {
-        log_jacobian = at::log(at::prod(slope, /*dim=*/1));
-    }
+    at::Tensor log_jacobian = at::log(at::prod(slope, /*dim=*/1));
 
     auto left_integral = at::cumsum(theta, /*dim=*/2) / n_bins;
     left_integral = at::roll(left_integral, /*shifts=*/1, /*dims=*/2);
     
-    auto index = torch::tensor({0}, torch::kLong);
+    auto index = at::tensor({0}, at::kLong);
     left_integral.index_fill_(2, index, 0);
 
     left_integral = at::gather(left_integral, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
@@ -67,10 +62,9 @@ std::pair<at::Tensor, std::optional<at::Tensor>> PWLinearCouplingTransform::forw
 }
 
 
-std::pair<at::Tensor, std::optional<at::Tensor>> PWLinearCouplingTransform::backward(
+std::pair<at::Tensor, at::Tensor> PWLinearCouplingTransform::backward(
     at::Tensor x,
-    at::Tensor theta,
-    bool compute_log_jacobian
+    at::Tensor theta
 ) const {
     auto N_ = theta.size(0);
     auto x_dim_ = theta.size(1);
@@ -81,38 +75,35 @@ std::pair<at::Tensor, std::optional<at::Tensor>> PWLinearCouplingTransform::back
     TORCH_CHECK(N == N_, "Shape mismatch");
     TORCH_CHECK(x_dim == x_dim_, "Shape mismatch");
 
-    theta = n_bins * torch::softmax(theta, /*dim=*/2);
+    theta = n_bins * at::softmax(theta, /*dim=*/2);
 
-    auto left_integral = torch::cumsum(theta, /*dim=*/2) / n_bins;
-    left_integral = torch::roll(left_integral, /*shifts=*/1, /*dims=*/2);
+    auto left_integral = at::cumsum(theta, /*dim=*/2) / n_bins;
+    left_integral = at::roll(left_integral, /*shifts=*/1, /*dims=*/2);
 
-    auto index = torch::tensor({0}, torch::kLong);
+    auto index = at::tensor({0}, at::kLong);
     left_integral.index_fill_(2, index, 0);
 
     auto overhead = (x.unsqueeze(-1) - left_integral).detach();
     overhead.index_put_({overhead < 0}, 2);
 
-    auto bin_id = torch::argmin(overhead, /*dim=*/2);
-    bin_id = torch::clamp(bin_id, /*min=*/0, /*max=*/n_bins - 1);
+    auto bin_id = at::argmin(overhead, /*dim=*/2);
+    bin_id = at::clamp(bin_id, /*min=*/0, /*max=*/n_bins - 1);
 
-    if (torch::any(torch::isnan(bin_id)).item<bool>()) {
+    if (at::any(at::isnan(bin_id)).item<bool>()) {
         throw std::runtime_error("NaN found!");
     }
-    if (torch::any(bin_id < 0).item<bool>() || torch::any(bin_id >= n_bins).item<bool>()) {
+    if (at::any(bin_id < 0).item<bool>() || at::any(bin_id >= n_bins).item<bool>()) {
         throw std::runtime_error("Indexing error!");
     }
 
-    left_integral = torch::gather(left_integral, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
-    auto slope = torch::gather(theta, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
+    left_integral = at::gather(left_integral, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
+    auto slope = at::gather(theta, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
 
-    auto x_ = bin_id.toType(torch::kDouble) / n_bins + (x - left_integral) / slope;
+    auto x_ = bin_id.toType(at::kDouble) / n_bins + (x - left_integral) / slope;
 
-    x_ = torch::clamp(x_, /*min=*/EPS, /*max=*/1 - EPS);
+    x_ = at::clamp(x_, /*min=*/EPS, /*max=*/1 - EPS);
 
-    torch::optional<torch::Tensor> log_jacobian = torch::nullopt;
-    if (compute_log_jacobian) {
-        log_jacobian = -torch::log(torch::prod(slope, /*dim=*/1));
-    }
+    at::Tensor log_jacobian = -at::log(at::prod(slope, /*dim=*/1));
 
     return {x_.detach(), log_jacobian};
 }

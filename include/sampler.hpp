@@ -8,7 +8,7 @@
 
 class Sampler : public torch::nn::Module {
 public:
-    explicit Sampler(int dim, std::shared_ptr<Distribution> prior);
+    Sampler(int dim, std::shared_ptr<Distribution> prior);
     virtual ~Sampler() = default;
 
     virtual at::Tensor log_prob(at::Tensor x) const final;
@@ -21,5 +21,5 @@ private:
 
 class UniformSampler : public Sampler {
 public:
-    explicit UniformSampler(int dim);
+    UniformSampler(int dim) : Sampler(dim, std::make_shared<UniformDistribution>(dim)) {};
 };

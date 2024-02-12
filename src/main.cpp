@@ -13,7 +13,7 @@ int main() {
     UniformSampler sampler(3);
     CheckerboardMask mask(5);
     PWLinearCouplingTransform transform();
-    DNNTrainable trainable(3, torch::tensor({3, 3}), 2, 3);
+    DNNTrainable trainable(3, at::tensor({3, 3}), 2, 3);
 
     std::cout << "Target: " << integrand.target() << std::endl << std::endl;
 

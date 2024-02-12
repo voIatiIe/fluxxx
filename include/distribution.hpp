@@ -5,7 +5,7 @@
 
 class Distribution {
 public:
-    explicit Distribution(int dim);
+    Distribution(int dim);
     virtual ~Distribution() = default;
 
     virtual at::Tensor sample(at::IntArrayRef size) const = 0;

@@ -1,10 +1,12 @@
 #include "mask.hpp"
 #include <cmath>
+#include <torch/torch.h>
 
+#include <iostream>
 
 Mask::Mask(int dim) : dim(dim) {}
 
-std::vector<std::vector<bool>> Mask::operator()(std::optional<std::size_t> n) const {
+std::vector<at::Tensor> Mask::operator()(std::optional<std::size_t> n) const {
     auto masks_ = masks();
 
     if (!n.has_value()) n = (dim > 5) ? 2 * ceil(log2(dim)) : dim;
@@ -13,7 +15,7 @@ std::vector<std::vector<bool>> Mask::operator()(std::optional<std::size_t> n) co
     std::size_t n_copies = n_masks / masks_.size();
     std::size_t n_addition = n_masks % masks_.size();
 
-    std::vector<std::vector<bool>> extended;
+    std::vector<at::Tensor> extended;
 
     for (std::size_t i = 0; i < n_copies; ++i)
         extended.insert(extended.end(), masks_.begin(), masks_.end());
@@ -24,17 +26,16 @@ std::vector<std::vector<bool>> Mask::operator()(std::optional<std::size_t> n) co
 }
 
 
-std::vector<std::vector<bool>> CheckerboardMask::masks() const {
-    std::vector<std::vector<bool>> _masks;
+std::vector<at::Tensor> CheckerboardMask::masks() const {
+    std::vector<at::Tensor> _masks;
 
-    for (std::size_t mod = 1; mod < dim; mod *= 2) {
-        std::vector<bool> _mask(dim);
+    auto indices = at::arange(0, dim, 1).to(at::kInt);
 
-        for (int i = 0; i < dim; ++i) _mask[i] = (i / mod) % 2 == 0;
-        _masks.push_back(_mask);
+    for (int mod = 1; mod < dim; mod *= 2) {
+        auto mask_tensor = (indices.div(mod, "trunc") % 2).to(at::kBool);
 
-        for (int i = 0; i < dim; ++i) _mask[i] = !_mask[i];
-        _masks.push_back(_mask);
+        _masks.push_back(mask_tensor);
+        _masks.push_back(~mask_tensor);
     }
 
     return _masks;

@@ -5,7 +5,7 @@
 
 class Integrand {
 public:
-    explicit Integrand(int dim);
+    Integrand(int dim);
     virtual ~Integrand() = default;
 
     at::Tensor operator()(at::Tensor x);
@@ -22,7 +22,7 @@ protected:
 
 class GaussIntegrand : public Integrand {
 public:
-    explicit GaussIntegrand(int dim, double mu = 0.5, double sigma = 0.1);
+    GaussIntegrand(int dim, double mu = 0.5, double sigma = 0.1);
 
     at::Tensor callable(at::Tensor x) override;
     double target() const override;

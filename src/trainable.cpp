@@ -1,13 +1,13 @@
 #include "trainable.hpp"
 
 
-Trainable::Trainable(int64_t dim_in, torch::Tensor out_shape) : dim_in(dim_in), out_shape(out_shape) {
+Trainable::Trainable(int64_t dim_in, at::Tensor out_shape) : dim_in(dim_in), out_shape(out_shape) {
     dim_out = 1;
     for (const auto& d : out_shape.sizes())
         dim_out *= d;
 }
 
-torch::Tensor Trainable::forward(torch::Tensor x) {
+at::Tensor Trainable::forward(at::Tensor x) {
     std::vector<int> out_shape_vector;
     std::vector<int64_t> view_sizes = {x.sizes()[0]};
 
@@ -22,7 +22,7 @@ torch::Tensor Trainable::forward(torch::Tensor x) {
 
 DNNTrainable::DNNTrainable(
     int64_t dim_in,
-    torch::Tensor out_shape,
+    at::Tensor out_shape,
     int64_t n_hidden,
     int64_t dim_hidden
 ) : Trainable(dim_in, out_shape) {
