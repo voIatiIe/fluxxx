@@ -12,7 +12,6 @@ CouplingCell::CouplingCell(
 
     mask = torch::cat({mask, torch::tensor({false}, torch::kBool)});
     mask_complement = torch::cat({mask_complement, torch::tensor({false}, torch::kBool)});
-
 }
 
 at::Tensor CouplingCell::forward(at::Tensor xj) {

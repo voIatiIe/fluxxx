@@ -1,8 +1,8 @@
-#include "mask.hpp"
 #include <cmath>
 #include <torch/torch.h>
 
-#include <iostream>
+#include "mask.hpp"
+
 
 Mask::Mask(int dim) : dim(dim) {}
 
