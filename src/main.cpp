@@ -8,6 +8,8 @@
 #include "trainable.hpp"
 #include "flow.hpp"
 #include "constant.hpp"
+#include "trainer.hpp"
+#include "loss.hpp"
 
 
 int main() {
@@ -41,6 +43,12 @@ int main() {
     std::cout << flow.is_inverted() << std::endl;
     flow.invert();
     std::cout << flow.is_inverted() << std::endl;
+
+    Trainer trainer(
+        flow,
+        sampler,
+        variance_loss
+    );
 
     return 0;
 }
