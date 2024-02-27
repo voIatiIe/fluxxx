@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "trainer.hpp"
 
 
@@ -5,7 +7,7 @@ void Trainer::process_loss(double loss) {
     if (!last_loss.has_value())
         last_loss = loss;
     else
-        last_loss = *last_loss * (1 - 0.1) + loss * 0.9;
+        last_loss = last_loss.value() * (1 - 0.1) + loss * 0.9;
 }
 
 
@@ -16,8 +18,9 @@ void Trainer::process_train_batch_step(torch::Tensor x, torch::Tensor px, torch:
 
         double switch_loss_threshold = flat_loss_mean - flat_loss_std;
 
-        if (last_loss.has_value() && *last_loss < switch_loss_threshold) {
+        if (last_loss.has_value() && (last_loss.value() < switch_loss_threshold)) {
             sample_forward = true;
+            std::cout << "Switched to forward sampling mode" << std::endl;
         }
     }
 }
@@ -49,7 +52,7 @@ torch::Tensor Trainer::train_minibatch(
     xj = flow.forward(xj);
 
     x = xj.slice(1, 0, -1);
-    auto log_qx = xj.slice(1, -1) + prior.log_prob(x);
+    auto log_qx = xj.slice(1, -1).squeeze(1) + prior.log_prob(x);
 
     optimizer.zero_grad();
     auto loss_ = loss(fx, px, log_qx);
@@ -89,7 +92,6 @@ void Trainer::train_batch(
     torch::Tensor x,
     torch::Tensor px,
     torch::Tensor fx,
-    int n_epochs,
     float minibatch_share
 ) {
     TORCH_CHECK(minibatch_share > 0.0 && minibatch_share <= 1.0, "Invalid minibatch share: ", minibatch_share);

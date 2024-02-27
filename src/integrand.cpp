@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cmath>
 
 #include "integrand.hpp"
@@ -21,6 +22,7 @@ GaussIntegrand::GaussIntegrand(int dim, double mu, double sigma) : Integrand(dim
 at::Tensor GaussIntegrand::callable(at::Tensor x) {
     auto normFactor = std::pow(sigma * std::sqrt(M_PI), -dim);
     auto exponent = -at::pow((x - mu) / sigma, 2).sum(1);
+
     return normFactor * at::exp(exponent);
 }
 

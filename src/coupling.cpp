@@ -1,16 +1,18 @@
+#include <iostream>
+
 #include "coupling.hpp"
 
 
 CouplingCell::CouplingCell(
     int64_t dim,
     std::shared_ptr<CouplingTransform> transform,
-    at::Tensor mask,
+    at::Tensor mask_,
     std::shared_ptr<Trainable> trainable
-) : dim(dim), transform(transform), mask(mask), trainable(trainable) {
+) : dim(dim), transform(transform), trainable(trainable) {
 
-    mask_complement = torch::logical_not(mask);
+    mask_complement = torch::logical_not(mask_);
 
-    mask = torch::cat({mask, torch::tensor({false}, torch::kBool)});
+    mask = torch::cat({mask_, torch::tensor({false}, torch::kBool)});
     mask_complement = torch::cat({mask_complement, torch::tensor({false}, torch::kBool)});
 }
 

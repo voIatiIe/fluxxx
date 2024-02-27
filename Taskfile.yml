@@ -11,4 +11,4 @@ tasks:
   build:
     cmds:
       - cmake -S . -B build
-      - make -C build
+      - make -j8 -C build

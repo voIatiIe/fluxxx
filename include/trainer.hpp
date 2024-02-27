@@ -13,8 +13,9 @@ public:
     Trainer(
         Flow flow,
         Sampler prior,
-        Loss loss
-    ): flow(flow), prior(prior), loss(loss) {};
+        Loss loss,
+        int n_epochs
+    ): flow(flow), prior(prior), loss(loss), n_epochs(n_epochs) {};
 
     torch::Tensor sample(int n_points);
 
@@ -40,9 +41,10 @@ public:
         torch::Tensor x,
         torch::Tensor px,
         torch::Tensor fx,
-        int n_epochs = 20,
         float minibatch_share = 1.0
     );
+
+    bool sample_forward = false;
 
 private:
     Flow flow;
@@ -50,6 +52,6 @@ private:
     Loss loss;
 
     int step = 0;
-    bool sample_forward = false;
+    int n_epochs = 10;
     std::optional<double> last_loss = std::nullopt;
 };

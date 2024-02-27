@@ -1,3 +1,4 @@
+#include <iostream>
 #include <limits>
 
 #include "transform.hpp"
@@ -30,6 +31,8 @@ std::pair<at::Tensor, at::Tensor> PWLinearCouplingTransform::forward(
     TORCH_CHECK(N == N_, "Shape mismatch");
     TORCH_CHECK(x_dim == x_dim_, "Shape mismatch");
 
+    theta = n_bins * at::softmax(theta, /*dim=*/2);
+
     auto bin_id = at::floor(n_bins * x);
     bin_id = at::clamp(bin_id, /*min=*/0, /*max=*/n_bins - 1);
     bin_id = bin_id.to(at::kLong);
@@ -39,7 +42,7 @@ std::pair<at::Tensor, at::Tensor> PWLinearCouplingTransform::forward(
     if (at::any(bin_id < 0).item<bool>() || at::any(bin_id >= n_bins).item<bool>())
         throw std::runtime_error("Indexing error!");
 
-    x = x - bin_id.toType(at::kDouble) / n_bins;
+    x = x - bin_id.toType(at::kFloat) / n_bins;
     auto slope = at::gather(theta, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
 
     x *= slope;
@@ -99,13 +102,13 @@ std::pair<at::Tensor, at::Tensor> PWLinearCouplingTransform::backward(
     left_integral = at::gather(left_integral, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
     auto slope = at::gather(theta, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
 
-    auto x_ = bin_id.toType(at::kDouble) / n_bins + (x - left_integral) / slope;
+    auto x_ = bin_id.toType(at::kFloat) / n_bins + (x - left_integral) / slope;
 
     x_ = at::clamp(x_, /*min=*/EPS, /*max=*/1 - EPS);
 
     at::Tensor log_jacobian = -at::log(at::prod(slope, /*dim=*/1));
 
-    return {x_.detach(), log_jacobian};
+    return {x_, log_jacobian};
 }
 
 // TODO: Implement PWQuadraticCouplingTransform

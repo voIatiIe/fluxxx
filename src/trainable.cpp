@@ -2,9 +2,7 @@
 
 
 Trainable::Trainable(int64_t dim_in, at::Tensor out_shape) : dim_in(dim_in), out_shape(out_shape) {
-    dim_out = 1;
-    for (const auto& d : out_shape.sizes())
-        dim_out *= d;
+    dim_out = out_shape.prod().item<int64_t>();
 }
 
 at::Tensor Trainable::forward(at::Tensor x) {
