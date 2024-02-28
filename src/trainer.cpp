@@ -37,7 +37,7 @@ torch::Tensor Trainer::sample(int n_points) {
 }
 
 
-torch::Tensor Trainer::train_minibatch(
+double Trainer::train_minibatch(
     torch::Tensor x,
     torch::Tensor px,
     torch::Tensor fx,
@@ -45,6 +45,8 @@ torch::Tensor Trainer::train_minibatch(
 ) {
     if (!flow.is_inverted())
         flow.invert();
+
+    optimizer.zero_grad();
 
     auto zeros = torch::zeros({x.size(0), 1});
     auto xj = torch::cat({x, zeros}, 1);
@@ -54,13 +56,12 @@ torch::Tensor Trainer::train_minibatch(
     x = xj.slice(1, 0, -1);
     auto log_qx = xj.slice(1, -1).squeeze(1) + prior.log_prob(x);
 
-    optimizer.zero_grad();
     auto loss_ = loss(fx, px, log_qx);
     loss_.backward();
 
     optimizer.step();
 
-    return loss_;
+    return loss_.detach().item<double>();
 }
 
 
@@ -68,8 +69,7 @@ void Trainer::train_batch_step(
     torch::Tensor x,
     torch::Tensor px,
     torch::Tensor fx,
-    torch::optim::Optimizer& optimizer,
-    float minibatch_share
+    torch::optim::Optimizer& optimizer
 ) {
     auto minibatch_size = (int)(minibatch_share * x.size(0));
 
@@ -83,7 +83,7 @@ void Trainer::train_batch_step(
             optimizer
         );
 
-        process_loss(loss.item<double>());
+        process_loss(loss);
     }
 }
 
@@ -91,15 +91,12 @@ void Trainer::train_batch_step(
 void Trainer::train_batch(
     torch::Tensor x,
     torch::Tensor px,
-    torch::Tensor fx,
-    float minibatch_share
+    torch::Tensor fx
 ) {
-    TORCH_CHECK(minibatch_share > 0.0 && minibatch_share <= 1.0, "Invalid minibatch share: ", minibatch_share);
-
     auto optimizer = torch::optim::Adam(flow.parameters(), torch::optim::AdamOptions(1e-3).weight_decay(1e-5));
 
     for (int epoch = 0; epoch < n_epochs; ++epoch)
-        train_batch_step(x, px, fx, optimizer, minibatch_share);
+        train_batch_step(x, px, fx, optimizer);
 
     process_train_batch_step(x, px, fx);
     step += 1;

@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "coupling.hpp"
 
 
@@ -9,6 +7,8 @@ CouplingCell::CouplingCell(
     at::Tensor mask_,
     std::shared_ptr<Trainable> trainable
 ) : dim(dim), transform(transform), trainable(trainable) {
+
+    register_module("trainable", trainable);
 
     mask_complement = torch::logical_not(mask_);
 

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <tuple>
+#include <vector>
 
 #include "integrand.hpp"
 #include "trainer.hpp"
@@ -13,13 +14,13 @@ public:
         std::shared_ptr<Integrand> integrand,
         Trainer trainer,
         Sampler posterior,
-        int n_iter_survey,
-        int n_iter_refine,
+        int n_survey_steps,
+        int n_refine_steps,
         int n_points_survey,
         int n_points_refine
     ):
         integrand(integrand), trainer(trainer), posterior(posterior),
-        n_iter_survey(n_iter_survey), n_iter_refine(n_iter_refine), n_points_survey(n_points_survey), n_points_refine(n_points_refine) {};
+        n_survey_steps(n_survey_steps), n_refine_steps(n_refine_steps), n_points_survey(n_points_survey), n_points_refine(n_points_refine) {};
 
     void integrate();
 
@@ -33,9 +34,14 @@ protected:
     void survey_step();
     void survey();
 
+    void finalize();
+
 private:
     std::shared_ptr<Integrand> integrand;
     Trainer trainer;
     Sampler posterior;
-    int n_iter_survey, n_iter_refine, n_points_survey, n_points_refine;
+    int n_survey_steps, n_refine_steps, n_points_survey, n_points_refine;
+    int n_survey_step = 0, n_refine_step = 0;
+
+    std::vector<double> integrals, uncertainties;
 };

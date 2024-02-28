@@ -20,12 +20,13 @@ public:
 
     void invert();
 
-    // TODO: potential mistake 
-    bool is_inverted() { return !cells[0].is_inverted(); }
+    // TODO: potential mistake
+    // TODO: Make more generic - support PWQuadraticCouplingCell
+    bool is_inverted() { return !(std::dynamic_pointer_cast<PWLinearCouplingCell>(cells[0])) -> is_inverted(); }
 
 private:
     int64_t dim;
     std::vector<at::Tensor> masks;
     CellType cell_type;
-    std::vector<CouplingCell> cells;
+    torch::nn::ModuleList cells;
 };

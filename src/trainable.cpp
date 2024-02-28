@@ -34,4 +34,6 @@ DNNTrainable::DNNTrainable(
     }
 
     trainable->push_back(torch::nn::Linear(dim_hidden, dim_out));
+
+    register_module("inner_trainable", trainable);
 }

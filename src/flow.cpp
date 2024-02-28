@@ -12,7 +12,7 @@ Flow::Flow(int64_t dim, std::vector<at::Tensor> masks, CellType cell_type) : dim
 
         switch (cell_type) {
         case CellType::PWLINEAR:
-            cells.push_back(
+            cells -> push_back(
                 PWLinearCouplingCell(
                     dim,
                     mask,
@@ -32,18 +32,25 @@ Flow::Flow(int64_t dim, std::vector<at::Tensor> masks, CellType cell_type) : dim
             break;
         }
     }
+
+    register_module("cells", cells);
 }
 
 
+// TODO: Make more generic - support PWQuadraticCouplingCell
 void Flow::invert() {
-    for (int i = 0; i < cells.size(); i++)
-        cells[i].invert();
+    for (auto& cell : *cells) {
+        auto cell_ = std::dynamic_pointer_cast<PWLinearCouplingCell>(cell);
+        cell_ -> invert();
+    }
 }
 
 
 at::Tensor Flow::forward(at::Tensor xj) {
-    for (int i = 0; i < cells.size(); i++)
-        xj = cells[i].forward(xj);
+    for (auto& cell : *cells) {
+        auto cell_ = std::dynamic_pointer_cast<PWLinearCouplingCell>(cell);
+        xj = cell_ -> forward(xj);
+    }
 
     return xj;
 }

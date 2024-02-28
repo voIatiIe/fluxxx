@@ -1,4 +1,3 @@
-#include <iostream>
 #include <limits>
 
 #include "transform.hpp"
@@ -51,7 +50,7 @@ std::pair<at::Tensor, at::Tensor> PWLinearCouplingTransform::forward(
 
     auto left_integral = at::cumsum(theta, /*dim=*/2) / n_bins;
     left_integral = at::roll(left_integral, /*shifts=*/1, /*dims=*/2);
-    
+
     auto index = at::tensor({0}, at::kLong);
     left_integral.index_fill_(2, index, 0);
 
@@ -102,13 +101,12 @@ std::pair<at::Tensor, at::Tensor> PWLinearCouplingTransform::backward(
     left_integral = at::gather(left_integral, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
     auto slope = at::gather(theta, /*dim=*/2, /*index=*/bin_id.unsqueeze(-1)).squeeze(-1);
 
-    auto x_ = bin_id.toType(at::kFloat) / n_bins + (x - left_integral) / slope;
-
-    x_ = at::clamp(x_, /*min=*/EPS, /*max=*/1 - EPS);
+    x = bin_id.toType(at::kFloat) / n_bins + (x - left_integral) / slope;
+    x = at::clamp(x, /*min=*/EPS, /*max=*/1 - EPS);
 
     at::Tensor log_jacobian = -at::log(at::prod(slope, /*dim=*/1));
 
-    return {x_, log_jacobian};
+    return {x.detach(), log_jacobian};
 }
 
 // TODO: Implement PWQuadraticCouplingTransform
