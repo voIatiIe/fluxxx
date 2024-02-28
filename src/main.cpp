@@ -10,8 +10,16 @@
 #include "loss.hpp"
 #include "integrator.hpp"
 
+void integrate();
 
 int main() {
+    integrate();
+
+    return 0;
+}
+
+
+void integrate() {
     torch::set_num_threads(8);
 
     const int dim = 4;
@@ -41,6 +49,4 @@ int main() {
     );
 
     integrator.integrate();
-
-    return 0;
 }
