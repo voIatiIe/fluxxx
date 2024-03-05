@@ -2,6 +2,7 @@
 #include <tuple>
 
 #include "integrator.hpp"
+#include "profiler.hpp"
 
 
 std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> Integrator::sample_survey() {
@@ -21,7 +22,14 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> Integrator::sample_surve
 
 
 void Integrator::survey_step() {
-    auto res = sample_survey();
+    PROFILE("survey_step");
+
+    std::tuple<at::Tensor, at::Tensor, at::Tensor> res;
+
+    {
+        PROFILE("survey_step -> sample_survey");
+        res = sample_survey();
+    }
 
     auto x = std::get<0>(res);
     auto px = std::get<1>(res);

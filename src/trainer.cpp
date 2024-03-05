@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "profiler.hpp"
 #include "trainer.hpp"
 
 
@@ -51,13 +52,20 @@ double Trainer::train_minibatch(
     auto zeros = torch::zeros({x.size(0), 1});
     auto xj = torch::cat({x, zeros}, 1);
 
-    xj = flow.forward(xj);
+    {
+        PROFILE("survey_step -> train_batch -> train_batch_step -> train_minibatch (flow.forward)");
+        xj = flow.forward(xj);
+    }
 
     x = xj.slice(1, 0, -1);
     auto log_qx = xj.slice(1, -1).squeeze(1) + prior.log_prob(x);
 
     auto loss_ = loss(fx, px, log_qx);
-    loss_.backward();
+
+    {
+        PROFILE("survey_step -> train_batch -> train_batch_step -> train_minibatch (loss_.backward)");
+        loss_.backward();
+    }
 
     optimizer.step();
 
@@ -71,6 +79,8 @@ void Trainer::train_batch_step(
     torch::Tensor fx,
     torch::optim::Optimizer& optimizer
 ) {
+    PROFILE("survey_step -> train_batch -> train_batch_step");
+
     auto minibatch_size = (int)(minibatch_share * x.size(0));
 
     for (int i = 0; i < x.size(0); i += minibatch_size) {
@@ -93,6 +103,8 @@ void Trainer::train_batch(
     torch::Tensor px,
     torch::Tensor fx
 ) {
+    PROFILE("survey_step -> train_batch");
+
     auto optimizer = torch::optim::Adam(flow.parameters(), torch::optim::AdamOptions(1e-3).weight_decay(1e-5));
 
     for (int epoch = 0; epoch < n_epochs; ++epoch)
