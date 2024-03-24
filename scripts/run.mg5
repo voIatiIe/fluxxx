@@ -1,0 +1,7 @@
+define ud=u d
+define udx=u~ d~
+define v = a z
+
+generate d d~ > d d~ /a g
+output standalone mg5/fortran_output
+launch -f 

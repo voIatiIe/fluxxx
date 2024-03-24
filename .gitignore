@@ -1,3 +1,6 @@
 .vscode
 build
 libtorch
+__pycache__
+mg5
+python

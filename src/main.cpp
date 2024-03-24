@@ -9,13 +9,40 @@
 #include "trainer.hpp"
 #include "loss.hpp"
 #include "integrator.hpp"
+#include "generator.hpp"
+#include "wrapper.hpp"
 
 void integrate();
 
 int main() {
-    integrate();
+    std::vector<double> initial_masses = {0.0, 0.0};
+    std::vector<double> final_masses = {0.0, 0.0, 0.0, 0.0};
+
+    PhaseSpaceGenerator generator(initial_masses, final_masses);
+
+    auto result = generator.generate_kinematics_batch(1000.0, torch::tensor({{0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2}}));
+
+    std::cout << std::get<0>(result) << std::endl;
+    std::cout << std::get<1>(result) << std::endl;
 
     return 0;
+}
+
+
+void python_call() {
+    at::Tensor tensor = torch::tensor({
+        {1.0, 2.0, 1.0, 2.0},
+        {3.0, 4.0, 1.0, 2.0},
+        {5.0, 6.0, 1.0, 2.0},
+        {7.0, 8.0, 1.0, 2.0}
+    }).to(at::kFloat);
+
+    MatrixWrapper wrapper;
+
+    wrapper.initialisemodel();
+    double result = wrapper.smatrix(tensor);
+
+    std::cout << result << std::endl;
 }
 
 

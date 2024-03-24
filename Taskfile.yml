@@ -11,4 +11,13 @@ tasks:
   build:
     cmds:
       - cmake -S . -B build
-      - make -j8 -C build
+      - make -j4 -C build
+
+  install:
+    cmds:
+      - mkdir python
+      - wget https://www.python.org/ftp/python/3.8.11/Python-3.8.11.tgz
+      - tar -xzf Python-3.8.11.tgz -C python
+      - source {{.PWD}}/python/Python-3.8.11/configure
+      - sudo make install
+      - rm Python-3.8.11.tgz
