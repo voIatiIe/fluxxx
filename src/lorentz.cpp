@@ -55,15 +55,17 @@ at::Tensor boost(at::Tensor x, at::Tensor beta) {
     return x;
 }
 
-at::Tensor pseudo_rapidity(at::Tensor x) {
-    auto pt = at::sqrt(at::sum(at::pow(x.slice(1, 1, 3), 2), -1));
-    auto th = at::atan2(pt, x.select(1, 3));
+at::Tensor pseudo_rapidity(at::Tensor x, bool batched) {
+    int dim = batched ? 2 : 1;
 
-    auto condition = (pt < FEPS) & (at::abs(x.select(1, 3)) < FEPS);
+    auto pt = at::sqrt(at::sum(at::pow(x.slice(dim, 1, 3), 2), -1));
+    auto th = at::atan2(pt, x.select(dim, 3));
+
+    auto condition = (pt < FEPS) & (at::abs(x.select(dim, 3)) < FEPS);
 
     return at::where(
         condition,
-        FMAX * at::ones_like(x.select(1, 3)),
+        FMAX * at::ones_like(x.select(dim, 3)),
         -at::log(at::tan(th / 2))
     );
 }

@@ -167,7 +167,10 @@ void PhaseSpaceGenerator::set_initial_momenta(at::Tensor& momenta, double E) {
 
 std::tuple<at::Tensor, at::Tensor> PhaseSpaceGenerator::generate_kinematics_batch(
     double E,
-    at::Tensor random_batch
+    at::Tensor random_batch,
+    double pT_mincut,
+    double delR_mincut,
+    double rap_maxcut
 ) {
     at::Tensor weight_jac = at::ones({random_batch.size(0)}, torch::kFloat64);
 
@@ -241,16 +244,6 @@ std::tuple<at::Tensor, at::Tensor> PhaseSpaceGenerator::generate_kinematics_batc
 
     auto result_ = result.clone();
 
-
-
-
-    auto pT_mincut = -1.0;
-    auto delR_mincut = -1.0;
-    auto rap_maxcut = -1.0;
-
-
-
-
     auto q_theta = std::get<0>(at::min(
         at::sqrt(
             at::pow(result.slice(1, 2).select(2, 1), 2) 
@@ -282,7 +275,7 @@ std::tuple<at::Tensor, at::Tensor> PhaseSpaceGenerator::generate_kinematics_batc
     }
 
     if (rap_maxcut > 0) {
-        auto rap_max = std::get<0>(at::max(pseudo_rapidity(result.slice(1, 2)), 1));
+        auto rap_max = std::get<0>(at::max(pseudo_rapidity(result.slice(1, 2), true), 1));
 
         factor *= at::where(
             rap_maxcut < at::abs(rap_max),

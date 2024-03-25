@@ -31,9 +31,10 @@ void integrate_mg() {
     std::vector<double> final_masses = {0.0, 0.0};
 
     MGIntegrand integrand(E, initial_masses, final_masses);
-    UniformSampler sampler(integrand.dim);
+    int dim = integrand.dim;
 
-    Flow flow(integrand.dim, CheckerboardMask(integrand.dim)(), CellType::PWLINEAR);
+    UniformSampler sampler(dim);
+    Flow flow(dim, CheckerboardMask(dim)(), CellType::PWLINEAR);
 
     Trainer trainer(
         flow,

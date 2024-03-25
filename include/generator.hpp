@@ -25,7 +25,13 @@ public:
         return n_final == 1 ? 0 : 3*n_final - 4;
     }
 
-    std::tuple<at::Tensor, at::Tensor> generate_kinematics_batch(double E, at::Tensor random_batch);
+    std::tuple<at::Tensor, at::Tensor> generate_kinematics_batch(
+        double E,
+        at::Tensor random_batch,
+        double pT_mincut = 0.1,
+        double delR_mincut = 0.4,
+        double rap_maxcut = 2.4
+    );
 
     double flat_weights(double E, int n);
 

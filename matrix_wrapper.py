@@ -15,8 +15,6 @@ def initialisemodel():
     matrix2py.initialisemodel(root_path+"/mg5/fortran_output/Cards/param_card.dat")
 
 def smatrix(tensor: np.ndarray):
-    print("Calculating matrix element")
-
     result = np.array(
         [
             matrix2py.smatrix(row.T.tolist())

@@ -5,6 +5,7 @@ scripts_path=$(dirname $path)
 root_path=$(dirname $scripts_path)
 
 export LD_LIBRARY_PATH=$dir_path/MG5_aMC_v2_8_3_2/HEPTools/lhapdf6_py3/lib
+export LD_LIBRARY_PATH=$root_path/python/lib
 
 $root_path/python/bin/python3.8 $root_path/mg5/bin/mg5_aMC --logging=ERROR --file=$scripts_path/run.mg5
 
