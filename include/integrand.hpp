@@ -2,6 +2,8 @@
 
 #include <torch/torch.h>
 
+#include "generator.hpp"
+#include "wrapper.hpp"
 
 class Integrand {
 public:
@@ -14,8 +16,9 @@ public:
     virtual at::Tensor callable(at::Tensor x) = 0;
     virtual double target() const = 0;
 
-protected:
     int dim;
+
+protected:
     int64_t calls;
 };
 
@@ -30,4 +33,18 @@ public:
 private:
     double mu;
     double sigma;
+};
+
+
+class MGIntegrand : public Integrand {
+public:
+    MGIntegrand(double E, std::vector<double> initial_masses, std::vector<double> final_masses);
+
+    at::Tensor callable(at::Tensor x) override;
+    double target() const override;
+
+private:
+    PhaseSpaceGenerator generator;
+    double E;
+    MatrixWrapper wrapper;
 };

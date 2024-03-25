@@ -24,6 +24,9 @@ at::Tensor massless_map(at::Tensor x, at::Tensor exp) {
 
 
 at::Tensor PhaseSpaceGenerator::bisect_vec_batch(at::Tensor x) {
+    if (x.size(1) == 0)
+        return torch::tensor({});
+
     const double target = 1e-16;
     int maxLevel = 600;
     int level = 0;
