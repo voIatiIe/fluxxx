@@ -11,24 +11,29 @@
 #include "integrator.hpp"
 #include "generator.hpp"
 #include "distribution.hpp"
+#include "parser.hpp"
 
 void integrate();
 void phasgen();
 void calculate_matrix_element();
-void integrate_mg();
+void integrate_mg(double E);
 
 
 int main() {
-    integrate_mg();
+    integrate_mg(1000.0);
+
     return 0;
 }
 
-void integrate_mg() {
+void integrate_mg(double E) {
     torch::set_num_threads(8);
 
-    double E = 1000.0;
-    std::vector<double> initial_masses = {0.0, 0.0};
-    std::vector<double> final_masses = {0.0, 0.0};
+    ConfigParser parser;
+
+    auto particle_masses = parser.parse_masses();
+
+    std::vector<double> initial_masses = particle_masses.first;
+    std::vector<double> final_masses = particle_masses.second;
 
     MGIntegrand integrand(E, initial_masses, final_masses);
     int dim = integrand.dim;
