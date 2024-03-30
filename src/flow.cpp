@@ -4,7 +4,7 @@
 #include "flow.hpp"
 
 
-Flow::Flow(int64_t dim, std::vector<at::Tensor> masks, CellType cell_type) : dim(dim), masks(masks), cell_type(cell_type) {
+Flow::Flow(int64_t dim, std::vector<at::Tensor> masks, CellType cell_type, int n_bins, int n_hidden, int dim_hidden) : dim(dim), masks(masks), cell_type(cell_type) {
     assert(masks.size());
 
     for (int i = 0; i < masks.size(); i++) {
@@ -16,9 +16,9 @@ Flow::Flow(int64_t dim, std::vector<at::Tensor> masks, CellType cell_type) : dim
                 PWLinearCouplingCell(
                     dim,
                     mask,
-                    /*n_bins*/16,
-                    /*n_hidden*/3,
-                    /*dim_hidden*/32
+                    /*n_bins*/n_bins,
+                    /*n_hidden*/n_hidden,
+                    /*dim_hidden*/dim_hidden
                 )
             );
             break;

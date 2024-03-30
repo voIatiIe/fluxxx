@@ -13,7 +13,10 @@ public:
     Flow(
         int64_t dim,
         std::vector<at::Tensor> masks,
-        CellType cell_type
+        CellType cell_type,
+        int n_bins,
+        int n_hidden,
+        int dim_hidden
     );
 
     at::Tensor forward(at::Tensor xj);

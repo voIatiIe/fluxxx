@@ -12,6 +12,7 @@
 #include "generator.hpp"
 #include "distribution.hpp"
 #include "parser.hpp"
+#include "config.hpp"
 
 void integrate();
 void phasgen();
@@ -27,7 +28,9 @@ int main() {
 
 
 void integrate_mg(double E) {
-    torch::set_num_threads(8);
+    Config config("config.cfg");
+
+    torch::set_num_threads(config.get<int>("n_threads"));
 
     ConfigParser parser;
 
@@ -40,24 +43,31 @@ void integrate_mg(double E) {
     int dim = integrand.dim;
 
     PaddedUniformSampler sampler(dim);
-    Flow flow(dim, CheckerboardMask(dim)(), CellType::PWLINEAR);
+    Flow flow(
+        dim,
+        CheckerboardMask(dim)(),
+        CellType::PWLINEAR,
+        /*n_bins=*/config.get<int>("n_bins"),
+        /*n_hidden=*/config.get<int>("n_hidden"),
+        /*dim_hidden=*/config.get<int>("dim_hidden")
+    );
 
     Trainer trainer(
         flow,
         std::make_shared<PaddedUniformSampler>(sampler),
         variance_loss,
-        /*n_epochs=*/10,
-        /*minibatch_share=*/1.0
+        /*n_epochs=*/config.get<int>("n_epochs"),
+        /*minibatch_share=*/config.get<double>("minibatch_share")
     );
 
     Integrator integrator(
         std::make_shared<MGIntegrand>(integrand),
         trainer,
         std::make_shared<PaddedUniformSampler>(sampler),
-        /*n_survey_steps=*/10,
-        /*n_refine_steps=*/10,
-        /*n_points_survey=*/10000,
-        /*n_points_refine=*/10000
+        /*n_survey_steps=*/config.get<int>("n_survey_steps"),
+        /*n_refine_steps=*/config.get<int>("n_refine_steps"),
+        /*n_points_survey=*/config.get<int>("n_points_survey"),
+        /*n_points_refine=*/config.get<int>("n_points_refine")
     );
 
     integrator.integrate();
@@ -101,7 +111,7 @@ void integrate() {
     CheckerboardMask mask(dim);
     UniformSampler sampler(dim);
 
-    Flow flow(dim, mask(), CellType::PWLINEAR);
+    Flow flow(dim, mask(), CellType::PWLINEAR, 50, 3, 64);
 
     Trainer trainer(
         flow,
