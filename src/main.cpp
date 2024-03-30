@@ -25,6 +25,7 @@ int main() {
     return 0;
 }
 
+
 void integrate_mg(double E) {
     torch::set_num_threads(8);
 
@@ -38,12 +39,12 @@ void integrate_mg(double E) {
     MGIntegrand integrand(E, initial_masses, final_masses);
     int dim = integrand.dim;
 
-    UniformSampler sampler(dim);
+    PaddedUniformSampler sampler(dim);
     Flow flow(dim, CheckerboardMask(dim)(), CellType::PWLINEAR);
 
     Trainer trainer(
         flow,
-        sampler,
+        std::make_shared<PaddedUniformSampler>(sampler),
         variance_loss,
         /*n_epochs=*/10,
         /*minibatch_share=*/1.0
@@ -52,11 +53,11 @@ void integrate_mg(double E) {
     Integrator integrator(
         std::make_shared<MGIntegrand>(integrand),
         trainer,
-        sampler,
+        std::make_shared<PaddedUniformSampler>(sampler),
         /*n_survey_steps=*/10,
         /*n_refine_steps=*/10,
-        /*n_points_survey=*/20000,
-        /*n_points_refine=*/20000
+        /*n_points_survey=*/10000,
+        /*n_points_refine=*/10000
     );
 
     integrator.integrate();
@@ -80,11 +81,11 @@ void calculate_matrix_element() {
 
 void phasgen() {
     std::vector<double> initial_masses = {0.0, 0.0};
-    std::vector<double> final_masses = {0.0, 0.0, 0.0, 0.0};
+    std::vector<double> final_masses = {0.0, 0.0};
 
     PhaseSpaceGenerator generator(initial_masses, final_masses);
 
-    auto result = generator.generate_kinematics_batch(1000.0, torch::tensor({{0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2}}));
+    auto result = generator.generate_kinematics_batch(1000.0, torch::tensor({{0.00001, 0.00001}}));
 
     std::cout << std::get<0>(result) << std::endl;
     std::cout << std::get<1>(result) << std::endl;
@@ -104,7 +105,7 @@ void integrate() {
 
     Trainer trainer(
         flow,
-        sampler,
+        std::make_shared<UniformSampler>(sampler),
         variance_loss,
         /*n_epochs=*/10,
         /*minibatch_share=*/1.0
@@ -113,7 +114,7 @@ void integrate() {
     Integrator integrator(
         std::make_shared<GaussIntegrand>(integrand),
         trainer,
-        sampler,
+        std::make_shared<UniformSampler>(sampler),
         /*n_survey_steps=*/10,
         /*n_refine_steps=*/10,
         /*n_points_survey=*/20000,

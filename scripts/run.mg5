@@ -4,4 +4,4 @@ define v = a z
 
 generate e+ e- > e+ e-
 output standalone mg5/fortran_output
-launch -f 
+launch -f

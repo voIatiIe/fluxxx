@@ -20,7 +20,14 @@ def smatrix(tensor: np.ndarray):
             matrix2py.smatrix(row.T.tolist())
             for row in tensor
         ],
-        dtype=np.float32
+        dtype=np.float64
     )
+
+    nan_ind = np.argwhere(np.isnan(result))
+    for ind in nan_ind:
+        print(f"first nan at {ind}")
+        print(tensor[ind[0]])
+
+        break
 
     return result

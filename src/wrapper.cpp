@@ -60,7 +60,7 @@ torch::Tensor MatrixWrapper::smatrix(torch::Tensor tensor) {
     PyObject* pArray = PyArray_SimpleNewFromData(
         tensor.dim(),
         dims,
-        NPY_FLOAT,
+        NPY_DOUBLE,
         tensor.data_ptr()
     );
 
@@ -74,7 +74,7 @@ torch::Tensor MatrixWrapper::smatrix(torch::Tensor tensor) {
         torch::Tensor result = torch::from_blob(
             PyArray_DATA((PyArrayObject*)pResult),
             {sizes[0]},
-            at::kFloat
+            at::kDouble
         );
         Py_DECREF(pResult);
         return result;

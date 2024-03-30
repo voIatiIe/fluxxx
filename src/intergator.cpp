@@ -10,7 +10,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> Integrator::sample_surve
     if (trainer.sample_forward)
         xj = trainer.sample(n_points_survey);
     else
-        xj = posterior.forward(n_points_survey);
+        xj = posterior->forward(n_points_survey);
 
     auto x = xj.slice(/*dim=*/1, /*start=*/0, /*end=*/-1);
     auto px = torch::exp(-xj.slice(/*dim=*/1, /*start=*/-1).squeeze(1));

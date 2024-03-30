@@ -13,3 +13,15 @@ at::Tensor Sampler::forward(int n_points) const {
 
     return at::cat({ sample, log_j.unsqueeze(-1) }, -1);
 }
+
+
+at::Tensor PaddedUniformSampler::forward(int n_points) const {
+    const double padding = 10e-5;
+
+    auto sample = prior->sample({ n_points, dim });
+    sample.clamp_(padding, 1 - padding);
+
+    auto log_j = -log_prob(sample);
+
+    return at::cat({ sample, log_j.unsqueeze(-1) }, -1);
+}

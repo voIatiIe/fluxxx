@@ -12,7 +12,7 @@ class Trainer {
 public:
     Trainer(
         Flow flow,
-        Sampler prior,
+        std::shared_ptr<Sampler> prior,
         Loss loss,
         int n_epochs,
         float minibatch_share
@@ -49,7 +49,7 @@ public:
 
 private:
     Flow flow;
-    Sampler prior;
+    std::shared_ptr<Sampler> prior;
     Loss loss;
 
     int step = 0;

@@ -45,15 +45,14 @@ MGIntegrand::MGIntegrand(
 
 
 at::Tensor MGIntegrand::callable(at::Tensor x) {
-    auto res = generator.generate_kinematics_batch(E, x);
+    auto res = generator.generate_kinematics_batch(E, x, 10.0, 0.4, 2.5);
 
-    auto mrx = wrapper.smatrix(std::get<0>(res).to(at::kFloat));
-    auto jac = std::get<1>(res).to(at::kFloat);
+    auto mrx = wrapper.smatrix(std::get<0>(res).to(at::kDouble));
+    auto jac = std::get<1>(res).to(at::kDouble);
 
     const double NORM = 2.5681894616e-9;
-    auto result = mrx * jac / NORM;
 
-    return result;
+    return mrx * jac / NORM;
 }
 
 

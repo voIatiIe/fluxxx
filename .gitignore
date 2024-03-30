@@ -4,3 +4,7 @@ libtorch
 __pycache__
 mg5
 python
+params/*
+nsqso_born.inc
+param.log
+py.py

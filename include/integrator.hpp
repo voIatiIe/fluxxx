@@ -13,7 +13,7 @@ public:
     Integrator(
         std::shared_ptr<Integrand> integrand,
         Trainer trainer,
-        Sampler posterior,
+        std::shared_ptr<Sampler> posterior,
         int n_survey_steps,
         int n_refine_steps,
         int n_points_survey,
@@ -39,7 +39,7 @@ protected:
 private:
     std::shared_ptr<Integrand> integrand;
     Trainer trainer;
-    Sampler posterior;
+    std::shared_ptr<Sampler> posterior;
     int n_survey_steps, n_refine_steps, n_points_survey, n_points_refine;
     int n_survey_step = 0, n_refine_step = 0;
 
