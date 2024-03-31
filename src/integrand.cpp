@@ -36,8 +36,11 @@ double GaussIntegrand::target() const {
 MGIntegrand::MGIntegrand(
     double E,
     std::vector<double> initial_masses,
-    std::vector<double> final_masses
-) : Integrand(1), E(E), generator(PhaseSpaceGenerator(initial_masses, final_masses)) {
+    std::vector<double> final_masses,
+    double pT_mincut,
+    double delR_mincut,
+    double rap_maxcut
+) : Integrand(1), E(E), pT_mincut(pT_mincut), delR_mincut(delR_mincut), rap_maxcut(rap_maxcut), generator(PhaseSpaceGenerator(initial_masses, final_masses)) {
     dim = generator.n_dims();
 
     wrapper.initialisemodel();
@@ -45,7 +48,7 @@ MGIntegrand::MGIntegrand(
 
 
 at::Tensor MGIntegrand::callable(at::Tensor x) {
-    auto res = generator.generate_kinematics_batch(E, x, 10.0, 0.4, 2.5);
+    auto res = generator.generate_kinematics_batch(E, x, pT_mincut, delR_mincut, rap_maxcut);
 
     auto mrx = wrapper.smatrix(std::get<0>(res).to(at::kDouble));
     auto jac = std::get<1>(res).to(at::kDouble);

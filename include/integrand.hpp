@@ -38,7 +38,14 @@ private:
 
 class MGIntegrand : public Integrand {
 public:
-    MGIntegrand(double E, std::vector<double> initial_masses, std::vector<double> final_masses);
+    MGIntegrand(
+        double E,
+        std::vector<double> initial_masses,
+        std::vector<double> final_masses,
+        double pT_mincut,
+        double delR_mincut,
+        double rap_maxcut
+    );
 
     at::Tensor callable(at::Tensor x) override;
     double target() const override;
@@ -47,4 +54,5 @@ private:
     PhaseSpaceGenerator generator;
     double E;
     MatrixWrapper wrapper;
+    double pT_mincut, delR_mincut, rap_maxcut;
 };
