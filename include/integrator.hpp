@@ -22,7 +22,7 @@ public:
         integrand(integrand), trainer(trainer), posterior(posterior),
         n_survey_steps(n_survey_steps), n_refine_steps(n_refine_steps), n_points_survey(n_points_survey), n_points_refine(n_points_refine) {};
 
-    void integrate();
+    std::pair<double, double> integrate();
 
 protected:
     std::tuple<torch::Tensor, torch::Tensor, torch::Tensor> sample_refine();
@@ -34,7 +34,7 @@ protected:
     void survey_step();
     void survey();
 
-    void finalize();
+    std::pair<double, double> finalize();
 
 private:
     std::shared_ptr<Integrand> integrand;

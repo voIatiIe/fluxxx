@@ -21,3 +21,7 @@ tasks:
       - source {{.PWD}}/python/Python-3.8.11/configure
       - sudo make install
       - rm Python-3.8.11.tgz
+
+  run:
+    cmds:
+      - mpiexec -n {{.C}} ./build/fluxxx

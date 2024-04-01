@@ -1,5 +1,9 @@
 #include <memory>
 #include <torch/torch.h>
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include "mpi.h"
 
 #include "integrand.hpp"
 #include "sampler.hpp"
@@ -15,17 +19,39 @@
 #include "config.hpp"
 
 
-void integrate_mg();
+std::pair<double, double> integrate_mg();
 
 
-int main() {
-    integrate_mg();
+int main(int32_t argc, char** argv) {
+    MPI_Init(&argc, &argv);
+
+    int32_t rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    auto res = integrate_mg();
+    auto var = res.second * res.second;
+
+    double total_estimate = 0.0;
+    double total_variance = 0.0;
+
+    MPI_Reduce(&res.first, &total_estimate, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&var, &total_variance, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        double average_estimate = total_estimate / size;
+        double average_variance = std::sqrt(total_variance) / size;
+
+        std::cout << "Estimate: " << average_estimate << " +- " << average_variance << std::endl;
+    }
+
+    MPI_Finalize();
 
     return 0;
 }
 
 
-void integrate_mg() {
+std::pair<double, double> integrate_mg() {
     Config config("config.cfg");
 
     double E = config.get<double>("E");
@@ -62,7 +88,7 @@ void integrate_mg() {
     Trainer trainer(
         flow,
         std::make_shared<PaddedUniformSampler>(sampler),
-        variance_loss,
+        dkl_loss,
         /*n_epochs=*/config.get<int>("n_epochs"),
         /*minibatch_share=*/config.get<double>("minibatch_share")
     );
@@ -77,5 +103,5 @@ void integrate_mg() {
         /*n_points_refine=*/config.get<int>("n_points_refine")
     );
 
-    integrator.integrate();
+    return integrator.integrate();
 }

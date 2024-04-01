@@ -8,3 +8,4 @@ params/*
 nsqso_born.inc
 param.log
 py.py
+results/*

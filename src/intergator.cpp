@@ -29,6 +29,14 @@ void Integrator::survey_step() {
 
     auto var_mean = torch::var_mean(fx / px);
 
+    if (at::any(at::isnan(fx)).item<bool>()) {
+        std::cout << "$Error: NaNs detected in fx" << std::endl;
+        
+        // std::cout << x[0] << std::endl;
+
+        throw std::runtime_error("NaNs detected in fx");
+    }
+
     trainer.train_batch(x, px, fx);
 
     auto n_pts = x.sizes()[0];
@@ -37,12 +45,12 @@ void Integrator::survey_step() {
     auto unc = std::sqrt(std::get<0>(var_mean).item<double>() / n_pts);
 
     n_survey_step++;
-    std::cout << "Survey step [" << n_survey_step << "/" << n_survey_steps << "]: " << mean << " +- " << unc << std::endl;
+    std::cout << "$Survey step [" << n_survey_step << "/" << n_survey_steps << "]: " << mean << " +- " << unc << std::endl;
 }
 
 
 void Integrator::survey() {
-    std::cout << "Survey phase..." << std::endl;
+    std::cout << "$Survey phase..." << std::endl;
     for (int _ = 0; _ < n_survey_steps; _++)
         survey_step();
 }
@@ -77,18 +85,18 @@ void Integrator::refine_step() {
     uncertainties.push_back(unc);
 
     n_refine_step++;
-    std::cout << "Refine step [" << n_refine_step << "/" << n_refine_steps << "]: " << mean << " +- " << unc << std::endl;
+    std::cout << "$Refine step [" << n_refine_step << "/" << n_refine_steps << "]: " << mean << " +- " << unc << std::endl;
 }
 
 
 void Integrator::refine() {
-    std::cout << "Refine phase... " << n_refine_steps << std::endl;
+    std::cout << "$Refine phase... " << n_refine_steps << std::endl;
     for (int _ = 0; _ < n_refine_steps; _++)
         refine_step();
 }
 
 
-void Integrator::finalize() {
+std::pair<double, double> Integrator::finalize() {
     auto n_estimates = integrals.size();
 
     double mean = 0;
@@ -103,13 +111,12 @@ void Integrator::finalize() {
 
     unc = std::sqrt(unc) / n_estimates;
 
-    std::cout << "Estimate: " << mean << " +- " << unc << std::endl;
-    std::cout << "Target: " << integrand -> target() << std::endl;
+    return std::make_pair(mean, unc);
 }
 
 
-void Integrator::integrate() {
+std::pair<double, double> Integrator::integrate() {
     survey();
     refine();
-    finalize();
+    return finalize();
 }

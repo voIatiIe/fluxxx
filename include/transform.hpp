@@ -6,7 +6,8 @@
 #include <torch/torch.h>
 
 
-const double EPS = std::numeric_limits<double>::epsilon();
+// const double EPS = std::numeric_limits<double>::epsilon();
+const double EPS = 10e-5;
 
 class CouplingTransform {
 public:

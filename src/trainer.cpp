@@ -22,7 +22,7 @@ void Trainer::process_train_batch_step(torch::Tensor x, torch::Tensor px, torch:
 
         if (last_loss.has_value() && (last_loss.value() < switch_loss_threshold)) {
             sample_forward = true;
-            std::cout << "Switched to forward sampling mode" << std::endl;
+            std::cout << "$Switched to forward sampling mode" << std::endl;
         }
     }
 }

@@ -26,11 +26,11 @@ DNNTrainable::DNNTrainable(
 ) : Trainable(dim_in, out_shape) {
 
     trainable->push_back(torch::nn::Linear(dim_in, dim_hidden));
-    trainable->push_back(torch::nn::ReLU());
+    trainable->push_back(torch::nn::LeakyReLU());
 
     for (int64_t i = 0; i < n_hidden; ++i) {
         trainable->push_back(torch::nn::Linear(dim_hidden, dim_hidden));
-        trainable->push_back(torch::nn::ReLU());
+        trainable->push_back(torch::nn::LeakyReLU());
     }
 
     trainable->push_back(torch::nn::Linear(dim_hidden, dim_out));

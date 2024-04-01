@@ -47,7 +47,7 @@ public:
 
     bool sample_forward = false;
 
-private:
+public:
     Flow flow;
     std::shared_ptr<Sampler> prior;
     Loss loss;

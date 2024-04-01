@@ -11,7 +11,7 @@ import matrix2py
 
 
 def initialisemodel():
-    print("Initializing model")
+    print("$Initializing model")
     matrix2py.initialisemodel(root_path+"/params/param_card.dat")
 
 def smatrix(tensor: np.ndarray):
